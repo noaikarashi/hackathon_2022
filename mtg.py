@@ -35,7 +35,7 @@ def handle_some_command(ack: Ack, body: dict, client: WebClient):
                     "block_id": "input-title",
                     "element": {
                         "type": "plain_text_input",
-                        "action_id": "input",
+                        "action_id": "title",
                         "placeholder": { "type": "plain_text", "text": "ミーティングのタイトルを入力してください", "emoji": True }
                     },
                     "label": { "type": "plain_text", "text": "件名", "emoji": True},
@@ -46,7 +46,7 @@ def handle_some_command(ack: Ack, body: dict, client: WebClient):
                     "block_id": "input-assignee",
                     "element": {
                         "type": "multi_users_select",
-                        "action_id": "input",
+                        "action_id": "multi_users_select",
                         "placeholder": { "type": "plain_text", "text": "ミーティングに参加するユーザを選択してください", "emoji": True}
                     },
                     "label": { "type": "plain_text", "text": "参加者", "emoji": True},
@@ -56,6 +56,7 @@ def handle_some_command(ack: Ack, body: dict, client: WebClient):
 		        	"type": "input",
 			        "element": {
                         "type": "static_select",
+                        "action_id": "place",
                         "placeholder": { "type": "plain_text", "text": "活動場所を選択してください", "emoji": True },
 				    "options": [
 					    {
@@ -74,8 +75,7 @@ def handle_some_command(ack: Ack, body: dict, client: WebClient):
                             "text": { "type": "plain_text", "text": "その他", "emoji": True },
                             "value": "value-3"
                         }
-	    			],
-		    	    "action_id": "static_select-action"
+	    			]
 			        },
 			        "label": { "type": "plain_text", "text": "活動場所", "emoji": True }
 		        },
@@ -84,7 +84,7 @@ def handle_some_command(ack: Ack, body: dict, client: WebClient):
                     "block_id": "input-deadline",
                     "element": {
                         "type": "datepicker",
-                        "action_id": "input",
+                        "action_id": "day",
                         "placeholder": { "type": "plain_text", "text": "日付を選択してください", "emoji": True }
                     },
                     "label": { "type": "plain_text", "text": "開催日", "emoji": True },
@@ -94,9 +94,9 @@ def handle_some_command(ack: Ack, body: dict, client: WebClient):
 			        "type": "input",
 			        "element": {
                         "type": "timepicker",
+                        "action_id": "timepicker-action",
                         "initial_time": "12:00",
                         "placeholder": { "type": "plain_text", "text": "Select time", "emoji": True },
-		    		"action_id": "timepicker-action"
 			        },
 			        "label": { "type": "plain_text", "text": "開始時刻", "emoji": True }
 	    	    },
@@ -105,7 +105,7 @@ def handle_some_command(ack: Ack, body: dict, client: WebClient):
                     "block_id": "input-description",
                     "element": {
                         "type": "plain_text_input",
-                        "action_id": "input",
+                        "action_id": "detail",
                         "multiline": True,
                         "placeholder": { "type": "plain_text", "text": "できるだけ具体的に記入してください", "emoji": True }
                     },
@@ -115,63 +115,32 @@ def handle_some_command(ack: Ack, body: dict, client: WebClient):
             ]
         }
     )
+    
 
-        # ユーザがモーダルからデータ送信したときのリスナーです
-@app.view("modal-id")
-def view_submission(ack: Ack, body: dict, client: WebClient, logger):
-    ack()
-    logger.info(body)
-    # チャンネル ID を指定することもできます
-    client.chat_postMessage(
-        channel= "#ハッカソン",
-        blocks= [
-                {   
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": dict['input-title']                #"You have a new request:\n*<google.com|Fred Enriquez - Time Off request>*"
-                    }
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "*Type:*\nPaid time off\n*When:*\nAug 10-Aug 13\n*Hours:* 16.0 (2 days)\n*Remaining balance:* 32.0 hours (4 days)\n*Comments:* \"Family in town, going camping!\""
-                    },
-                    "accessory": {
-                        "type": "image",
-                        "image_url": "https://api.slack.com/img/blocks/bkb_template_images/approvalsNewDevice.png",
-                        "alt_text": "computer thumbnail"
-                    }
-                },
-                {
-                    "type": "actions",
-                    "elements": [
-                        {
-                            "type": "button",
-                            "text": {
-                                "type": "plain_text",
-                                "emoji": True,
-                                "text": "Approve"
-                            },
-                            "style": "primary",
-                            "value": "click_me_123"
-                        },
-                        {
-                            "type": "button",
-                            "text": {
-                                "type": "plain_text",
-                                "emoji": True,
-                                "text": "Deny"
-                            },
-                            "style": "danger",
-                            "value": "click_me_123"
-                        }
-                    ]
-                }
-            ]
-    )
+# @app.action("multi_users_select")
+# def start(ack: Ack, body: dict, action: dict, respond: Respond, context: BoltContext):
+#     assert body.get("response_url") is not None
+#     ack()
+#     # メッセージ内のボタンから来たので常に response_url が存在します
+#     respond(f"受け取った内容: {action}", replace_original=False)
+#     respond(f"<@{context.user_id}>さん！")
 
+# @app.action("join")
+# def start(ack: Ack, body: dict, action: dict, respond: Respond):
+#     assert body.get(input-assignee) is not None
+#     ack()
+#     # メッセージ内のセレクトメニューから来たので常に response_url が存在します
+#     respond(f"受け取った内容: {action}", replace_original=False)
+
+
+# ユーザがモーダルからデータ送信したときのリスナーです
+# @app.view("modal-id")
+# def view_submission(ack: Ack, body: dict, client: WebClient, logger, respond: Respond, context: BoltContext):
+#     ack()
+#     logger.info(body)
+#     # チャンネル ID を指定することもできます
+#     respond(f"内容：{body}")
+#     respond(f"<@{context.user_id}>さん！")
 
 # アプリを起動します
 if __name__ == "__main__":
