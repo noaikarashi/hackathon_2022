@@ -44,7 +44,7 @@ def handle_some_command(body, ack, client, logger):
                         "placeholder": { "type": "plain_text", "text": "ミーティングのタイトルを入力してください" },
                         "action_id": "title-action-id",
                     },
-                    "label": { "type": "plain_text", "text": "件名" },
+                    "label": { "type": "plain_text", "text": "内容" },
                 },
                 {
                     "type": "input",
@@ -130,20 +130,80 @@ def handle_view_submission(ack, body, client, logger):
     channel = "#ハッカソン"
     values = body["view"]["state"]["values"]
     users = values["users-block-id"]["users-action-id"]["selected_users"]
-    message = values["title-block-id"]["title-action-id"]["value"]
-    time = values["time-block-id"]["time-action-id"]["selected_time"]
+    title = values["title-block-id"]["title-action-id"]["value"]
+    mtg_time = values["time-block-id"]["time-action-id"]["selected_time"]
     place = values["place-block-id"]["place-action-id"]["selected_option"]["text"]["text"]
     day = values["day-block-id"]["day-action-id"]["selected_date"]
     detail = values["detail-block-id"]["detail-action-id"]["value"]
 
     # Slack API 上、他のユーザを直接通知するには、このようにユーザ ID を不等号に入れ、アットマークをつけると綺麗に表示されます <@user_id> 。
     at_users = " ".join([f"<@{name}>" for name in users])
-    
+
     client.chat_postMessage(
         channel = channel,
-        text = f"ユーザー：{at_users} \n {message} \n {time} \n {place} \n {day} \n {detail} "
+        blocks = [
+            {
+                "type": "header",
+                "text": { "type": "plain_text", "text": ":newspaper:  MTG通知 :newspaper:"}
+            },
+            {
+                "type": "context",
+                "elements": [
+                    { "text": f"開催日*{day}* *{mtg_time}*  |  ", "type": "mrkdwn"}
+                ]
+            },
+            {
+                "type": "section",
+                "text": { "type": "mrkdwn", "text": " :loud_sound: * [MTG概要]* :loud_sound:" }
+            },
+            {
+                "type": "section",
+                "text": { "type": "mrkdwn", "text": f"*{title}*" },
+            },
+            { "type": "divider" },
+            {
+                "type": "section",
+                "text": { "type": "mrkdwn", "text": f" :laughing: *参加者* :laughing:" }
+            },
+            {
+                "type": "section",
+                "text": { "type": "mrkdwn", "text": f"{at_users}参加お願いします!!" }
+            },
+            { "type": "divider" },
+            {
+                "type": "section",
+                "text": { "type": "mrkdwn", "text": f":calendar: |   *日時* {day} {mtg_time}  | :calendar: " }
+            },
+            {
+                "type": "section",
+                "text": { "type": "mrkdwn", "text": f"*{day}* *{mtg_time}* にMTG始めます!!" },
+            },
+            { "type": "divider" },
+            {
+                "type": "section",
+                "text": { "type": "mrkdwn", "text": " :classical_building: | *活動場所* | :classical_building: " }
+            },
+            {
+                "type": "section",
+                "text": { "type": "mrkdwn", "text": f" *{place}* に集まってください!!" },
+            },
+            { "type": "divider" },
+            {
+                "type": "section",
+                "text": { "type": "mrkdwn", "text": " :green_book: | *詳細内容(よく読んでください)* | :green_book: " }
+            },
+            {
+                "type": "section",
+                "text": { "type": "mrkdwn", "text": f"{detail}", "verbatim": False },
+            },
+        ]
     )
 
+    client.reminders_add(
+        token = os.environ.get("SLACK_USER_TOKEN"),
+        time = "in 5 seconds", 
+        text = f"\n MTG[{title}]を始めます。\n {at_users}は、「{place}」に参加お願いします \n 詳細:{detail}" 
+    ) 
 
 # アプリを起動します
 if __name__ == "__main__":
