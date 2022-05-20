@@ -201,7 +201,7 @@ def handle_view_submission(ack, body, client, logger):
 
     client.reminders_add(
         token = os.environ.get("SLACK_USER_TOKEN"),
-        time = "in 5 seconds", 
+        time = "in 3 seconds", 
         text = f"\n MTG[{title}]を始めます。\n {at_users}は、「{place}」に参加お願いします \n 詳細:{detail}" 
     ) 
 
